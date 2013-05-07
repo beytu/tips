@@ -2,17 +2,14 @@
 
 printf "Running preinst script\n"
 
-#example test
-if [ -e ${debian.target.dir}/${project.artifactId} ]; then
-    printf "Package has not be uninstall successfully. Remove ${debian.target.dir}/${project.artifactId} \n"
-    exit 1
-fi
 
 
+#check if group exist and add it if not
 if ! getent group ${debian.group} >/dev/null; then
     addgroup --system ${debian.group} >/dev/null
 fi
 
+#check if user exist and add it if not
 if ! getent passwd ${debian.user} /dev/null; then
     adduser --system --disabled-login --ingroup ${debian.group} --shell /bin/false ${debian.user} >/dev/null
 fi
