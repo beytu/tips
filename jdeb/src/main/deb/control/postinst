@@ -1,0 +1,11 @@
+#!/bin/sh
+
+if [ ! -e /etc/init.d/jdeb-tips ]; then
+    exit 1
+fi
+
+dos2unix /etc/init.d/jdeb-tips
+chmod 755 /etc/init.d/jdeb-tips
+
+update-rc.d jdeb-tips defaults
+service jdeb-tips start

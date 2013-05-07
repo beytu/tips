@@ -1,0 +1,10 @@
+Package: [[artifactId]]
+Version: [[version]]
+Section: misc
+Priority: optional
+Architecture: all
+Depends: dos2unix, sudo
+Suggests:
+Maintainer: Example <example@example.com>
+Description: Example of creating a debian package using Maven and JDeb
+Distribution: development

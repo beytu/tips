@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>fr.gunduz.tips.jdeb</groupId>
+    <artifactId>jdeb-tips</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>TIPS :: JDEB </name>
+    <description>
+        Build a debian package
+    </description>
+    
+    <properties>
+        <spring.version>3.2.1.RELEASE</spring.version>
+        
+        <debian.user>jdeb-tips</debian.user>
+        <debian.group>jdeb-tips</debian.group>
+        
+        <debian.target.dir>/var/lib</debian.target.dir>
+        <logfiles.destination>/var/log/jdeb-tips</logfiles.destination>
+    </properties>
+
+    
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        
+        <plugins>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.4.3</version>
+                <executions>
+                    <execution>
+                        <id>copy-deb-package-resources</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/deb</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/deb</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/libs</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>libs/</classpathPrefix>
+                            <mainClass>fr.gunduz.tips.jdeb.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            
+            
+            <plugin>
+                    <artifactId>jdeb</artifactId>
+                    <groupId>org.vafer</groupId>
+                    <version>1.0</version>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jdeb</goal>
+                            </goals>
+                            <configuration>
+
+                                <verbose>true</verbose>
+                                <controlDir>${basedir}/target/deb/control</controlDir>
+
+                                <dataSet>
+                                    
+                                     <data>
+                                        <src>${project.basedir}/target/libs</src>
+                                        <type>directory</type>
+                                        <mapper>
+                                            <type>perm</type>
+                                            <prefix>${debian.target.dir}/jdeb-tips/libs/</prefix>
+                                            <user>jdeb-tips</user>
+                                            <group>jdeb-tips</group>
+                                            <filemode>644</filemode>
+                                        </mapper>
+                                    </data>
+                                    
+                                    <data>
+                                        <src>${basedir}/target/${project.build.finalName}.jar</src>
+                                        <dst>${debian.target.dir}/jdeb-tips/${project.build.finalName}.jar</dst>
+                                        <type>file</type>
+                                        <mapper>
+                                            <type>perm</type>
+                                            <user>jdeb-tips</user>
+                                            <group>jdeb-tips</group>
+                                            <filemode>644</filemode>
+                                        </mapper>
+                                    </data>
+                                    <data>
+                                        <src>${basedir}/target/deb/init.d/jdeb-tips.sh</src>
+                                        <dst>/etc/init.d/jdeb-tips</dst>
+                                        <type>file</type>
+                                        <mapper>
+                                            <type>perm</type>
+                                            <user>root</user>
+                                            <group>root</group>
+                                            <filemode>755</filemode>
+                                        </mapper>
+                                    </data>
+                                </dataSet>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+        </plugins>
+    </build>
+    
+    
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.5</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>runtime</scope>
+            <version>1.0.11</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>0.11.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-expression</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        
+    </dependencies>
+</project>

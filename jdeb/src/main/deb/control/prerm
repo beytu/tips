@@ -1,0 +1,6 @@
+#!/bin/sh
+
+printf "Running prerm script\n"
+
+update-rc.d -f jdeb-tips remove
+
